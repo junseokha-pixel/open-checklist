@@ -49,7 +49,7 @@ textarea{min-height:110px;resize:vertical}
 .row.sub .t{font-weight:400;color:var(--muted);padding-left:14px}
 .row.sub .t::before{content:"└ "}
 .row.st-y{background:var(--ok-soft)} .row.st-n{background:var(--no-soft)}
-.tog{display:flex;gap:4px}
+.tog{display:flex;gap:4px;margin-right:12px}
 .tog button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--muted);
   border-radius:5px;padding:5px 6px;cursor:pointer;min-width:40px}
 .tog button.on.y{background:var(--ok);border-color:var(--ok);color:#fff}
@@ -57,11 +57,10 @@ textarea{min-height:110px;resize:vertical}
 .row input{font-size:13px}
 .head-row{display:grid;grid-template-columns:48px 1fr auto 1fr;gap:10px;padding:8px 12px;background:var(--soft);
   font-size:13px;font-weight:700;color:var(--muted)}
-.head-row span:nth-child(3){min-width:96px;text-align:center}
+.head-row span:nth-child(3){min-width:96px;text-align:center;margin-right:12px}
 @media (max-width:640px){.head-row{display:none}}
 .noList{margin:0 0 10px;padding-left:18px;color:var(--no);font-size:14px}
 .sign{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:640px){.sign{grid-template-columns:1fr}}
 .sign .box{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--card)}
 .sign .box b{display:block;margin-bottom:6px}
 .sig{margin-top:8px}
@@ -96,18 +95,27 @@ textarea{min-height:110px;resize:vertical}
   .card{margin:10px 0}
   .bar{padding:10px 12px;flex-wrap:wrap;row-gap:2px} .bar h2{font-size:15px}
   .bar .cnt{font-size:12px;font-weight:500}
-  .info{grid-template-columns:88px 1fr}
-  .info label{padding:10px 8px;font-size:13px;display:flex;align-items:center;white-space:nowrap}
-  .info div{padding:6px 8px}
+  /* 기본 정보: PC처럼 2열 바둑판 (항목명 | 입력 | 항목명 | 입력) */
+  .info{grid-template-columns:44px minmax(0,1fr) 44px minmax(0,1fr)}
+  .info label{padding:6px 3px;font-size:12px;line-height:1.25;display:flex;align-items:center;justify-content:center;
+    text-align:center;word-break:keep-all}
+  .info div{padding:5px 4px;min-width:0}
+  .info input[type=text],.info input[type=date]{padding:8px 5px;min-width:0;letter-spacing:-.2px}
+  .info input[type=date]{font-size:14px}
   /* iOS에서 입력 시 화면 확대 방지: 16px 이상 */
   input[type=text],input[type=date],textarea,.row input{font-size:16px;padding:9px 10px}
   .row{grid-template-columns:30px auto 1fr;grid-template-areas:"n t t" ". g m";gap:8px;padding:12px}
   .row .no{grid-area:n;text-align:left;align-self:start;padding-top:1px}
   .row .t{grid-area:t;font-size:15px} .row.sub .t{padding-left:4px}
   .row .tog{grid-area:g} .row .memo{grid-area:m;min-width:0}
-  .tog button{min-width:54px;min-height:42px;font-size:15px;padding:6px 8px}
-  .sign{gap:10px}
-  .sig .pad-wrap{height:110px}
+  .row .memo input{padding:3px 8px;height:30px;font-size:12px}
+  .tog button{min-width:34px;min-height:28px;height:28px;font-size:12px;padding:2px 5px;line-height:1}
+  /* 서명: PC처럼 2열 바둑판 (점검자 확인 | 매장 확인) */
+  .sign{gap:8px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .sign .box{padding:8px;min-width:0}
+  .sign .box b{font-size:14px;margin-bottom:4px}
+  .sign .box input{padding:6px 8px;height:34px}
+  .sig .pad-wrap{height:100px}
   .sig .tools button{font-size:14px;padding:6px 0}
   .dock .in{padding:8px 12px calc(8px + env(safe-area-inset-bottom));gap:8px}
   .prog{flex-basis:100%}
@@ -131,7 +139,7 @@ textarea{min-height:110px;resize:vertical}
 <div class="card">
   <div class="info">
     <label>매장명</label><div><input type="text" data-k="store" value="COMMON EATS"></div>
-    <label>점검일자</label><div><input type="date" data-k="date"></div>
+    <label>점검<wbr>일자</label><div><input type="date" data-k="date"></div>
     <label>매장 담당자</label><div><input type="text" data-k="owner"></div>
     <label>설치 담당자</label><div><input type="text" data-k="installer"></div>
   </div>
