@@ -264,6 +264,31 @@ function updateSubmittedLabel(){
 const _render = render;
 render = function(){ _render(); updateSubmittedLabel(); };
 
+// 필요할 때만 라이브러리 로드 (사이트에 함께 올린 파일, 외부 CDN 사용 안 함)
+const loadScript = src => new Promise((ok, fail) => {
+  if (document.querySelector(`script[src="${src}"]`)) return ok();
+  const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => fail(new Error('lib_load')); document.head.appendChild(s);
+});
+const SKIP = ['dock', 'toast', 'save-big', 'tools', 'ph'];
+async function makePdf() {
+  await loadScript('libs/html2canvas.min.js');
+  await loadScript('libs/jspdf.umd.min.js');
+  const canvas = await html2canvas(document.querySelector('.wrap'), {
+    scale: 1.5, backgroundColor: '#ffffff', windowWidth: 960,   // 휴대폰에서 저장해도 PC 화면 배치로 저장
+    ignoreElements: n => n.classList && SKIP.some(c => n.classList.contains(c)),
+    onclone: doc => {
+      doc.documentElement.setAttribute('data-theme', 'light');   // 다크모드여도 흰 바탕으로 저장
+      const w = doc.querySelector('.wrap'); w.style.paddingBottom = '16px'; w.style.maxWidth = '900px';
+      doc.querySelectorAll('[placeholder]').forEach(el => el.removeAttribute('placeholder'));   // 빈 칸 안내문구는 저장하지 않음
+    }
+  });
+  const { jsPDF } = window.jspdf;
+  const w = canvas.width, h = canvas.height;
+  const doc = new jsPDF({ orientation: 'p', unit: 'px', format: [w, h], hotfixes: ['px_scaling'], compress: true });
+  doc.addImage(canvas.toDataURL('image/jpeg', 0.85), 'JPEG', 0, 0, w, h);
+  return doc.output('datauristring').split(',')[1];   // base64만 전송
+}
+
 async function doSave() {
   if (!ENDPOINT) { showToast('서버 주소가 아직 설정되지 않았습니다. 관리자에게 문의해 주세요.', false); return; }
   if (!(S.f.store || document.querySelector('[data-k="store"]').value).trim()) { showToast('매장명을 입력해 주세요.', false); return; }
@@ -273,17 +298,13 @@ async function doSave() {
 
   if (!S.pendingId) { S.pendingId = newId(); save(); }   // 재시도해도 같은 ID → 서버에서 중복 저장 안 함
   const val = k => (S.f[k] != null ? S.f[k] : (document.querySelector(`[data-k="${k}"]`) || {}).value || '');
-  const itemMemo = {}; ITEMS.forEach(([n]) => { if (S.f['memo.' + n]) itemMemo[n] = S.f['memo.' + n]; });
-  const payload = {
-    v: 1, id: S.pendingId,
-    fields: { store: val('store'), date: val('date'), owner: val('owner'), installer: val('installer'),
-              memo: val('memo'), inspector: val('sign.inspector'), storeSigner: val('sign.store') },
-    status: S.st, itemMemo, signatures: { inspector: S.sig.inspector || '', store: S.sig.store || '' }
-  };
 
   const btns = [...document.querySelectorAll('.js-save')]; const labels = btns.map(b => b.textContent);
   btns.forEach(b => { b.disabled = true; b.textContent = '저장 중…'; });
   try {
+    const pdf = await makePdf();   // 체크리스트 화면을 그대로 PDF로
+    const payload = { v: 2, id: S.pendingId, store: val('store'), date: val('date'),
+                      installer: val('installer'), owner: val('owner'), pdf };
     const res = await fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
     const r = await res.json();
     if (!r.ok) throw new Error(r.error || 'error');
@@ -291,7 +312,9 @@ async function doSave() {
     delete S.pendingId; save(); render();
     showToast('저장되었습니다.', true);
   } catch (e) {
-    showToast(e.message === 'store_required' ? '매장명을 입력해 주세요.' : '저장에 실패했습니다. 네트워크를 확인하고 다시 눌러 주세요.', false);
+    showToast(e.message === 'store_required' ? '매장명을 입력해 주세요.'
+      : e.message === 'lib_load' ? 'PDF 변환 도구를 불러오지 못했습니다. 새로고침 후 다시 눌러 주세요.'
+      : '저장에 실패했습니다. 네트워크를 확인하고 다시 눌러 주세요.', false);
   } finally { btns.forEach((b, i) => { b.disabled = false; b.textContent = labels[i]; }); }
 }
 document.querySelectorAll('.js-save').forEach(b => b.onclick = doSave);
