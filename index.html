@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POS·KIOSK 개점 점검표</title>
+<style>
+:root{
+  --bg:#f4f6fa; --card:#ffffff; --ink:#1d2433; --muted:#6b7385; --line:#d9deea;
+  --navy:#1f3864; --navy-ink:#ffffff; --soft:#eef1f7;
+  --must:#c0392b; --must-soft:#fdecea; --imp:#1f3864; --ok:#1e8e5a; --ok-soft:#e3f5ec;
+  --warn:#b35c00;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151d; --card:#1a202b; --ink:#e6e9f0; --muted:#9aa3b5; --line:#2d3545;
+    --navy:#2b4a80; --soft:#232b39; --must:#ff6b5b; --must-soft:#3a1f1c; --imp:#8fb0ea;
+    --ok:#4cc38a; --ok-soft:#173326; --warn:#f0a050;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151d; --card:#1a202b; --ink:#e6e9f0; --muted:#9aa3b5; --line:#2d3545;
+  --navy:#2b4a80; --soft:#232b39; --must:#ff6b5b; --must-soft:#3a1f1c; --imp:#8fb0ea;
+  --ok:#4cc38a; --ok-soft:#173326; --warn:#f0a050;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-size:15px;line-height:1.45}
+.wrap{max-width:960px;margin:0 auto;padding:16px 16px 120px}
+h1{font-size:24px;margin:8px 0 4px;color:var(--imp)}
+.sub{color:var(--muted);margin:0 0 16px}
+.sub b.m{color:var(--must)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;margin:14px 0;overflow:hidden}
+.bar{background:var(--navy);color:var(--navy-ink);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bar h2{font-size:16px;margin:0;flex:1;min-width:160px}
+.bar .cnt{font-size:13px;font-weight:600;white-space:nowrap}
+.bar .cnt span{display:inline-block;min-width:26px;text-align:center;background:#fff;color:#1f3864;border-radius:5px;padding:1px 6px;margin:0 2px}
+.bar .note{font-size:12px;opacity:.85}
+.pad{padding:12px 14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;font-size:14px}
+th{background:var(--soft);font-weight:600}
+td.c,th.c{text-align:center}
+.tbl-scroll{overflow-x:auto}
+ul.rules{margin:0;padding-left:18px}
+ul.rules li{margin:4px 0}
+.m{color:var(--must);font-weight:700}
+.hint{color:var(--warn);font-size:13px;margin:6px 0 0}
+.hl td{background:var(--ok-soft)}
+input[type=text],input[type=date],input[type=number],select,textarea{
+  width:100%;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:5px;padding:5px 7px}
+textarea{min-height:80px;resize:vertical}
+/* checklist rows */
+.row{display:grid;grid-template-columns:70px 1fr auto auto;align-items:center;gap:8px;
+  padding:7px 12px 7px 10px;border-top:1px solid var(--line);border-left:4px solid transparent}
+.row.g-필수{border-left-color:var(--must)}
+.row.g-중요{border-left-color:var(--imp)}
+.row.st-ng{background:var(--must-soft)}
+.row.st-ok{background:var(--ok-soft)}
+.tag{font-size:13px;font-weight:700;white-space:nowrap}
+.g-필수 .tag{color:var(--must)} .g-중요 .tag{color:var(--imp)} .g-권장 .tag,.g-안내 .tag{color:var(--muted);font-weight:500}
+.txt small{display:block;color:var(--muted);font-size:12px}
+.dev{font-size:12px;font-weight:600;background:var(--soft);color:var(--imp);border-radius:5px;padding:3px 8px;white-space:nowrap;text-align:center}
+.tog{display:flex;gap:4px}
+.tog button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);
+  border-radius:5px;padding:4px 8px;cursor:pointer;min-width:40px}
+.tog button.on.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.tog button.on.ng{background:var(--must);border-color:var(--must);color:#fff}
+.cols{display:grid;grid-template-columns:1fr 1fr}
+.cols .row{grid-template-columns:1fr auto auto}
+.cols > div:first-child{border-right:1px solid var(--line)}
+@media (max-width:720px){
+  .cols{grid-template-columns:1fr} .cols > div:first-child{border-right:0}
+  .row{grid-template-columns:56px 1fr auto;grid-template-areas:"t x x" "t d k"}
+  .row .tag{grid-area:t} .row .txt{grid-area:x} .row .dev{grid-area:d;justify-self:start} .row .tog{grid-area:k}
+  .cols .row{grid-template-columns:1fr auto;grid-template-areas:"x x" "d k"}
+}
+.empty{visibility:hidden}
+/* verdict */
+.verdict{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+.vbox{flex:1;min-width:220px;border:2px solid var(--line);border-radius:8px;padding:12px 14px;opacity:.45}
+.vbox.on{opacity:1}
+.vbox.go.on{border-color:var(--ok);background:var(--ok-soft)}
+.vbox.hold.on{border-color:var(--must);background:var(--must-soft)}
+.vbox b{font-size:17px;display:block}
+.vbox.hold b{color:var(--must)} .vbox.go b{color:var(--ok)}
+.vbox small{color:var(--muted)}
+.ngList{margin:6px 0 10px;padding-left:18px;color:var(--must);font-size:14px}
+/* sticky progress */
+.dock{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);z-index:5}
+.dock .in{max-width:960px;margin:0 auto;padding:10px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.prog{flex:1;min-width:180px}
+.prog .track{height:8px;background:var(--soft);border-radius:4px;overflow:hidden}
+.prog .fill{height:100%;background:var(--ok);width:0;transition:width .2s}
+.prog .lbl{font-size:12px;color:var(--muted);margin-bottom:4px}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:6px 12px;cursor:pointer}
+.btn.pri{background:var(--navy);color:#fff;border-color:var(--navy)}
+@media print{
+  body{background:#fff;font-size:12px} .dock,.noprint{display:none!important}
+  .card{break-inside:avoid;border-color:#bbb} .wrap{padding:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>POS · KIOSK 개점 점검표</h1>
+<p class="sub">전체 92항목 · <b class="m">필수 35건</b> · 중요 18건 · 각 항목은 <b>정상 / 이상</b> 중 하나를 선택합니다.</p>
+
+<!-- 점검 안내 -->
+<div class="grid2">
+  <div class="card">
+    <div class="bar"><h2>개점 판정 규칙</h2></div>
+    <div class="pad">
+      <ul class="rules">
+        <li><span class="m">필수 35건</span>이 모두 <b>정상</b>이면 <b>개점 가능</b>입니다.</li>
+        <li>필수 중 <span class="m">‘이상’이 1건이라도</span> 있으면 <span class="m">개점 보류</span> — 개점하지 말고 즉시 본사에 보고해 주세요.</li>
+        <li><b>중요 18건</b>은 개점을 막지 않지만, 이상 시 <b>개점 당일 내</b> 원격 조치 후 결과를 회신합니다.</li>
+        <li><b>[12. 기타 설치항목]</b>은 개점 판정에 반영되지 않지만, 설치 완료 확인을 위해 <b>전건 체크</b>해 주세요.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card">
+    <div class="bar"><h2>등급 정의</h2></div>
+    <div class="pad tbl-scroll">
+      <table>
+        <tr><th class="c">등급</th><th class="c">건수</th><th>미충족 시 처리</th></tr>
+        <tr><td class="c m">필수 n</td><td class="c"><b>35건</b></td><td><span class="m">개점 불가.</span> 즉시 본사 · 벤더 현장지원 요청</td></tr>
+        <tr><td class="c"><b>중요 n</b></td><td class="c"><b>18건</b></td><td>개점 후 <b>당일 내</b> 원격 조치 및 결과 회신</td></tr>
+        <tr><td class="c"><b>안내</b></td><td class="c"><b>21건</b></td><td>점주 · 직원 교육. 직접 시연 확인 후 체크</td></tr>
+        <tr><td class="c"><b>권장</b></td><td class="c"><b>3건</b></td><td>이상 시 D+3 이내 협의</td></tr>
+        <tr><td class="c"><b>기타</b></td><td class="c"><b>15건</b></td><td><b>개점 판정 제외.</b> 이상 시 메모 후 당일 조치</td></tr>
+      </table>
+      <p class="hint">필수 · 중요 뒤의 번호는 <b>대분류마다 1번부터 다시 시작</b>합니다. 숫자가 끊기지 않고 이어지면 그 대분류는 빠짐없이 점검한 것입니다.</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="bar"><h2>키오스크 대기번호 대역 배분 (200 ~ 799)</h2></div>
+  <div class="pad tbl-scroll">
+    <table id="bandTbl">
+      <tr><th>설치 대수</th><th>1번 키오스크</th><th>2번 키오스크</th><th>3번 키오스크</th><th>4번 키오스크</th></tr>
+    </table>
+    <p class="hint">포스 001~199 · 키오스크 200~799 대역은 절대 겹치지 않게 설정하고, 각 기기에서 실제 발권해 시작번호를 눈으로 확인합니다.</p>
+  </div>
+</div>
+
+<!-- 기본 정보 -->
+<div class="card">
+  <div class="bar"><h2>기본 정보</h2><span class="note">점검 시작 전 먼저 채웁니다</span></div>
+  <div class="pad tbl-scroll">
+    <table>
+      <tr><th style="width:18%">매장명 / 코드</th><td><input type="text" data-k="info.store"></td>
+          <th style="width:18%">설치일</th><td><input type="date" data-k="info.date"></td></tr>
+      <tr><th>설치담당자</th><td><input type="text" data-k="info.installer"></td>
+          <th>연락처</th><td><input type="text" data-k="info.phone" data-nosave autocomplete="off"></td></tr>
+      <tr><th>POS 대수</th><td><select data-k="info.pos"><option value="">선택</option><option>1</option><option>2</option></select></td>
+          <th>키오스크 대수</th><td><select data-k="info.kiosk" id="kioskCnt"><option value="">선택</option><option>1</option><option>2</option><option>3</option><option>4</option></select></td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="bar"><h2>기기별 정보</h2></div>
+  <div class="pad tbl-scroll">
+    <table id="devTbl">
+      <tr><th>기기</th><th>일련번호 / 식별명</th><th>VAN사</th><th>CATID / 제품번호</th><th>대기번호 From ~ To</th></tr>
+    </table>
+    <p class="hint">TID는 기기마다 고유해야 하며, 중복되면 매출이 기기별로 분리되지 않습니다.</p>
+  </div>
+  <div id="vcatRow"></div>
+</div>
+
+<div id="sections"></div>
+
+<!-- 총계 -->
+<div class="card">
+  <div class="bar"><h2>총계 · 개점 판정</h2><span class="note">정상 처리한 개수가 자동 집계됩니다</span></div>
+  <div class="pad">
+    <table>
+      <tr><td class="m" style="width:90px">필수 합계</td><td><b id="sumMust">0</b> / 35</td><td style="color:var(--muted)">필수가 35/35 이어야 개점 가능</td></tr>
+      <tr><td style="color:var(--imp);font-weight:700">중요 합계</td><td><b id="sumImp">0</b> / 18</td><td style="color:var(--muted)">미달이어도 개점은 가능 · 당일 내 원격 조치</td></tr>
+    </table>
+    <div class="verdict">
+      <div class="vbox go" id="vGo"><b>개점 가능</b><small>필수 35건 전부 정상</small></div>
+      <div class="vbox hold" id="vHold"><b>개점 보류</b><small id="holdWhy">필수 미완료 또는 필수 이상 발생</small></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="bar"><h2>이상 · 미체크 항목</h2><span class="note">항목명 · 증상 · 재현조건</span></div>
+  <div class="pad">
+    <div id="ngAuto"></div>
+    <textarea data-k="memo" placeholder="이상 항목의 증상과 재현조건을 적어 주세요."></textarea>
+  </div>
+</div>
+
+<div class="card">
+  <div class="bar"><h2>확인 서명</h2></div>
+  <div class="pad tbl-scroll">
+    <table>
+      <tr><th></th><th>성명</th><th>서명</th></tr>
+      <tr><th>설치담당자</th><td><input type="text" data-k="sign.installer"></td><td style="height:40px"></td></tr>
+      <tr><th>점주</th><td><input type="text" data-k="sign.owner"></td><td style="height:40px"></td></tr>
+    </table>
+  </div>
+</div>
+</div>
+
+<div class="dock">
+  <div class="in">
+    <div class="prog"><div class="lbl" id="progLbl">진행률</div><div class="track"><div class="fill" id="progFill"></div></div></div>
+    <button class="btn" id="btnReset">초기화</button>
+    <button class="btn pri" onclick="window.print()">인쇄 / PDF</button>
+  </div>
+</div>
+
+<script>
+const P='포스', K='키오스크 전 대수', K1='키오스크 1대만', PK='포스 + 키오스크 전 대수', VT='VAN·TID 표 대조';
+const SECTIONS=[
+ {no:1,title:'결제수단 점검',items:[
+  ['필수','신용카드 결제',PK],['필수','토스페이 결제',K],
+  ['필수','프론트캠 설치 및 키오스크 재부팅 후 프론트캠 연결 확인',K,'(FrontCamManager 시리얼 인식) 인식이 늦거나 안 되면 랜선·프론트캠 교체'],
+  ['필수','키오스크 1대 전환 후 고객 사용 전에 결제·할인·앱적립 테스트',K1,'적립 누락 건은 당일 POS 결제내역 > 사후적립으로 처리'],
+  ['중요','카카오페이 결제',K1],['중요','페이코 결제',K1],['중요','즐거운 모바일상품권 결제',K1],
+  ['중요','쿠프마케팅 모바일상품권 결제',K1],['중요','다우기술 모바일상품권 결제',K1],['중요','윈큐브 모바일상품권 결제',K1]]},
+ {no:2,title:'반품 연동',items:[
+  ['필수','키오스크 결제내역을 POS에서 반품 처리','키오스크 → 포스'],
+  ['중요','키오스크 결제건 키오스크 자체 반품 처리',K],['권장','상품권·간편결제 건 반품',P]]},
+ {no:3,title:'출력물',items:[
+  ['필수','주방빌지 출력',PK],['필수','고객 영수증 출력',PK],['필수','고객 대기표 출력',PK],
+  ['필수','주문취소 고객 영수증',P],['필수','주문취소 주방빌지',P]]},
+ {no:4,title:'스탬프 적립',items:[
+  ['중요','POS 스탬프 적립',P],['중요','POS 스탬프 사후적립',P],['중요','키오스크 스탬프 적립','키오스크'],
+  ['권장','반품 시 스탬프 회수',P]]},
+ {no:6,title:'앱오더',items:[
+  ['필수','앱오더 개점',P],['필수','앱오더 마감',P],['중요','앱오더 주문접수 · 호출 · 완료 처리','포스 + 앱오더'],
+  ['중요','앱오더 주방빌지 출력',P],['중요','앱오더 먹고가기/포장하기 설정',P]]},
+ {no:8,title:'설정',items:[
+  ['필수','영수증 · 주방빌지 배율 설정',P],['필수','주방주문서 기본설정',P],['필수','주방주문서 기타출력설정',P],
+  ['필수','주방주문서 고급설정',P],['필수','매출반영시간 설정 (00시 ~ 24시)',P],['필수','대기번호 대역 — POS : 001',P],
+  ['필수','대기번호 대역 — 키오스크 : 200 ~ 799',K],['필수','키오스크 기기별 대기번호 From ~ To 배분',VT],
+  ['필수','기기별 VAN · TID 설정 확인',VT],['필수','정산 날짜 기준 — 매출 리포트 > 설정 > 결제·환불 한 날 매출에 각각 반영',P],
+  ['필수','POS 메뉴화면 즐겨찾기 사용 설정',P],['중요','POS 즐겨찾기 메뉴 설정',P],['중요','POS 카테고리 설정 및 2줄 / 1줄 보기',P]]},
+ {no:9,title:'배민 에이전트 숨김 처리',items:[
+  ['필수','BMPC 내재화 안내 및 점주 동의 확보',P],['필수','기존 배민 에이전트(BMPC) 바탕화면 숨김 처리',P],
+  ['필수','배달대행사 연동 설정 — 아래 기준표대로 처리',P],['권장','동의 이력 기록 보관',P]],after:'deliveryTable'},
+ {no:10,title:'기능 설명 (점주 교육)',items:[['필수','컴포즈 POS 주요 변경사항 교육',P]],
+  grid:{g:'안내',left:[['POS 즐겨찾기 수정 기능'],['매출 확인 방법'],['매출 리포트 보기권한 비밀번호 설정'],['KDS 기능'],['보류 기능'],
+    ['주문유형 — 매장 / 포장 / 둘다 구분'],['영수증 반품'],['스탬프 사후적립'],['품절 처리'],['배달 · 오더 중지 (채널별)']],
+   right:[['오더 수신 및 호출'],['즐겨찾기 옵션 기능'],['분할결제 방법'],['할인 기능'],['프로그램 실행'],['매뉴얼 전달',PK],
+    ['설치 담당자 연락처 전달',PK],['컴포즈 전용 연락처 안내',PK],['대시보드 접속 및 매출 확인 방법'],['앱오더 주문서 확인']]}},
+ {no:11,title:'배달주문 연동',items:[
+  ['필수','사용 중인 배달 채널 확인 및 연동 등록',P],['필수','BMPC 라이트 주문 접수',P],['필수','요기요 주문 접수',P],
+  ['필수','쿠팡이츠 주문 접수',P],['필수','배달 주방빌지 출력',P],['필수','배달 주문 취소 처리',P],
+  ['필수','배달 영업중지 · 재개 (채널별)',P],['필수','배달 메뉴 품절 처리 · 해제 (채널별)',P],
+  ['중요','기타 배달 채널 주문 접수 (땡겨요 등)',P],['중요','배달 고객 주문서 · 라이더 부착용 출력물',P],
+  ['중요','배달 매출 집계 반영',P],['안내','주문 폭주 시 조리시간 조정 · 접수 지연 대응',P]]},
+ {no:12,title:'기타 설치항목',note:'개점 판정 제외 · 전건 체크 · 별도 표기 없으면 포스',items:[],
+  grid:{g:'기타',left:[['POS, KIOSK, 프린터, 주방프린터, 단말기 장비 상태',PK],['프론트 설치 및 온보딩'],['프론트 캠 설치',K],
+    ['RNDIS 자동 실행 반영',K],['쫄대 작업 및 선정리',K],['케이블 연결 및 결착'],['듀얼 모니터(고객용 화면) 출력'],['영수증 프린터 전원 및 용지']],
+   right:[['단말기 점검'],['바코드 스캐너 반응'],['돈통 신호 연동'],['원격프로그램'],['바탕화면 설정',PK],
+    ['외부 포인트 적립 — L.POINT · OK캐시백',K1],['POS 적립 화면 — L.POINT · OK캐시백 노출확인']]}}
+];
+const BANDS=[['1대','200 ~ 799','—','—','—'],['2대','200 ~ 499','500 ~ 799','—','—'],
+ ['3대','200 ~ 399','400 ~ 599','600 ~ 799','—'],['4대','200 ~ 399','400 ~ 599','600 ~ 699','700 ~ 799']];
+const DEVICES=['POS #1','POS #2','KIOSK #1','KIOSK #2','KIOSK #3','KIOSK #4'];
+const STORE_KEY='open-checklist-v4';
+
+let S={st:{},f:{}};
+try{const r=localStorage.getItem(STORE_KEY); if(r) S=Object.assign(S,JSON.parse(r));}catch(e){}
+function save(){try{localStorage.setItem(STORE_KEY,JSON.stringify(S));}catch(e){}}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ITEMS=[];
+
+function rowHTML(id,g,label,t,dev,sub,compact){
+  ITEMS.push({id,g,label,t});
+  return `<div class="row g-${g}" data-id="${id}">
+   ${compact?'':`<span class="tag">${label}</span>`}
+   <span class="txt">${esc(t)}${sub?`<small>${esc(sub)}</small>`:''}</span>
+   <span class="dev ${dev?'':'empty'}">${esc(dev||'—')}</span>
+   <span class="tog"><button class="ok" data-v="ok">정상</button><button class="ng" data-v="ng">이상</button></span></div>`;
+}
+
+// band + device tables
+document.getElementById('bandTbl').insertAdjacentHTML('beforeend',
+ BANDS.map((r,i)=>`<tr data-band="${i+1}">${r.map((c,j)=>j?`<td>${c}</td>`:`<th class="c">${c}</th>`).join('')}</tr>`).join(''));
+document.getElementById('devTbl').insertAdjacentHTML('beforeend',
+ DEVICES.map((d,i)=>`<tr><th class="c">${d}</th>${['sn','van','catid','range'].map(c=>
+   `<td><input type="text" data-k="dev.${i}.${c}" ${c==='range'&&i>=2?`data-kidx="${i-2}"`:''} ${c==='range'&&i<2?'placeholder="001 ~ 199"':''}></td>`).join('')}</tr>`).join(''));
+document.getElementById('vcatRow').innerHTML=rowHTML('vcat','필수','확인','각 기기(키오스크)의 VCAT 정보와 일치하는지 확인하였습니다.','',null)
+  .replace('<span class="tag">확인</span>','<span class="tag">확인</span>');
+
+// sections
+let html='';
+SECTIONS.forEach(sec=>{
+  const n={필수:0,중요:0}; let body='';
+  sec.items.forEach((it,i)=>{
+    const [g,t,dev,sub]=it; let label=g;
+    if(g==='필수'||g==='중요'){n[g]++; label=`${g} ${n[g]}`;}
+    body+=rowHTML(`s${sec.no}-${i}`,g,label,t,dev,sub);
+  });
+  if(sec.grid){
+    const col=(arr,side)=>arr.map((it,i)=>rowHTML(`s${sec.no}-${side}${i}`,sec.grid.g,sec.grid.g,it[0],it[1],null,true)).join('');
+    body+=`<div class="cols"><div>${col(sec.grid.left,'L')}</div><div>${col(sec.grid.right,'R')}</div></div>`;
+  }
+  sec.n=n;
+  const cnt=['필수','중요'].filter(g=>n[g]).map(g=>`${g} <span id="c${sec.no}${g}">0</span>/${n[g]}`).join(' &nbsp; ');
+  html+=`<div class="card"><div class="bar"><h2>${sec.no}. ${sec.title}</h2>${sec.note?`<span class="note">${sec.note}</span>`:''}<span class="cnt">${cnt}</span></div>${body}</div>`;
+  if(sec.after==='deliveryTable') html+=`<div class="card"><div class="bar"><h2>필수 3 기준표 — 배달대행사 연동 설정</h2><span class="note">매장별 배달대행사 정보는 설치 전 컴포즈로부터 전달받습니다</span></div>
+   <div class="pad tbl-scroll"><table>
+    <tr><th>매장 구분</th><th>전환 매장 (기존 BMPC 있음)</th><th>신규 매장 (BMPC 없음)</th></tr>
+    <tr><th>① 배달대행사 미사용</th><td>BMPC · Lite 배달대행 연동 모두 OFF</td><td>Lite 배달대행 연동 OFF</td></tr>
+    <tr><th>② 바로고 · 젠딜리 · 부릉 · 생각대로</th><td>둘 다 OFF → 토스포스에서 라이더 호출</td><td>Lite OFF → 토스포스에서 라이더 호출</td></tr>
+    <tr><th>③ 위 4개 외 배달대행사</th><td>BMPC 배달대행사 설정 유지 · Lite ON</td><td class="m" style="font-weight:500">본사 확인 후 진행</td></tr>
+   </table><p class="hint" style="color:var(--must)">BMPC와 BMPC Lite가 동시에 배달대행사 프로그램에 연동되면 안 됩니다. 반드시 한쪽만 켜져 있어야 합니다.</p></div></div>`;
+});
+document.getElementById('sections').innerHTML=html;
+
+// toggles
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.tog button'); if(!b) return;
+  const id=b.closest('.row').dataset.id, v=b.dataset.v;
+  S.st[id]=S.st[id]===v?undefined:v; if(!S.st[id]) delete S.st[id];
+  save(); render();
+});
+// fields (연락처는 저장하지 않음)
+document.querySelectorAll('[data-k]').forEach(el=>{
+  const k=el.dataset.k;
+  if(!el.hasAttribute('data-nosave') && S.f[k]!=null) el.value=S.f[k];
+  el.addEventListener('input',()=>{ if(!el.hasAttribute('data-nosave')){S.f[k]=el.value; save();} if(el.id==='kioskCnt') bands(); });
+});
+function bands(){
+  const n=+document.getElementById('kioskCnt').value||0;
+  document.querySelectorAll('#bandTbl tr[data-band]').forEach(tr=>tr.classList.toggle('hl',+tr.dataset.band===n));
+  document.querySelectorAll('[data-kidx]').forEach(inp=>{const i=+inp.dataset.kidx; inp.placeholder=n&&i<n?BANDS[n-1][i+1]:'';});
+}
+document.getElementById('btnReset').onclick=()=>{
+  if(!confirm('모든 체크와 입력값을 지울까요?')) return;
+  S={st:{},f:{}}; save(); document.querySelectorAll('[data-k]').forEach(el=>el.value=''); bands(); render();
+};
+
+function render(){
+  document.querySelectorAll('.row').forEach(r=>{
+    const v=S.st[r.dataset.id];
+    r.classList.toggle('st-ok',v==='ok'); r.classList.toggle('st-ng',v==='ng');
+    r.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  });
+  SECTIONS.forEach(sec=>['필수','중요'].forEach(g=>{
+    const el=document.getElementById(`c${sec.no}${g}`); if(!el) return;
+    el.textContent=ITEMS.filter(it=>it.id.startsWith(`s${sec.no}-`)&&it.g===g&&S.st[it.id]==='ok').length;
+  }));
+  const core=ITEMS.filter(it=>it.id!=='vcat');
+  const must=core.filter(i=>i.g==='필수'), imp=core.filter(i=>i.g==='중요');
+  const mOk=must.filter(i=>S.st[i.id]==='ok').length, mNg=must.filter(i=>S.st[i.id]==='ng').length;
+  document.getElementById('sumMust').textContent=mOk;
+  document.getElementById('sumImp').textContent=imp.filter(i=>S.st[i.id]==='ok').length;
+  const go=mOk===must.length;
+  document.getElementById('vGo').classList.toggle('on',go);
+  document.getElementById('vHold').classList.toggle('on',!go);
+  document.getElementById('holdWhy').textContent=mNg?`필수 이상 ${mNg}건 발생 — 즉시 본사 보고`:`필수 미완료 ${must.length-mOk}건`;
+  const done=core.filter(i=>S.st[i.id]).length;
+  document.getElementById('progFill').style.width=(done/core.length*100)+'%';
+  document.getElementById('progLbl').textContent=`점검 ${done} / ${core.length} · 필수 ${mOk}/${must.length}`;
+  const ng=ITEMS.filter(i=>S.st[i.id]==='ng');
+  document.getElementById('ngAuto').innerHTML=ng.length?`<ul class="ngList">${ng.map(i=>{
+    const sec=i.id.match(/^s(\d+)/); return `<li>${sec?sec[1]+'. ':''}[${esc(i.label)}] ${esc(i.t)}</li>`;}).join('')}</ul>`:'';
+}
+bands(); render();
+</script>
+</body>
+</html>
