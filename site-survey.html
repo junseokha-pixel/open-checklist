@@ -80,6 +80,12 @@ textarea{min-height:110px;resize:vertical}
 .prog .fill{height:100%;background:var(--ok);width:0;transition:width .2s}
 .btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:6px 12px;cursor:pointer}
 .btn.pri{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn:disabled{opacity:.6;cursor:wait}
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);max-width:92vw;padding:10px 16px;border-radius:8px;
+  color:#fff;font-size:14px;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:20;display:none}
+.toast.show{display:block} .toast.ok{background:var(--ok)} .toast.err{background:var(--no)}
+.submitted{font-size:12px;color:var(--ok);margin-top:2px}
+@media print{.toast{display:none!important}}
 /* ===== 모바일 ===== */
 @media (max-width:640px){
   .wrap{padding:12px 12px calc(92px + env(safe-area-inset-bottom))}
@@ -102,8 +108,10 @@ textarea{min-height:110px;resize:vertical}
   .sig .pad-wrap{height:110px}
   .sig .tools button{font-size:14px;padding:6px 0}
   .dock .in{padding:8px 12px calc(8px + env(safe-area-inset-bottom));gap:8px}
-  .prog{min-width:120px}
-  .btn{padding:10px 12px;font-size:14px}
+  .prog{flex-basis:100%}
+  .dock .btn{flex:1;padding:10px 8px;font-size:14px}
+  .wrap{padding-bottom:calc(130px + env(safe-area-inset-bottom))}
+  .toast{bottom:120px}
 }
 @media print{body{background:#fff;font-size:12px}.dock{display:none}.wrap{padding:0}.card{break-inside:avoid}}
 </style>
@@ -153,7 +161,8 @@ textarea{min-height:110px;resize:vertical}
   <div class="in">
     <div class="prog"><div class="lbl" id="progLbl"></div><div class="track"><div class="fill" id="progFill"></div></div></div>
     <button class="btn" id="btnReset">초기화</button>
-    <button class="btn pri" onclick="window.print()">인쇄 / PDF</button>
+    <button class="btn" onclick="window.print()">인쇄 / PDF</button>
+    <button class="btn pri" id="btnSubmit">제출</button>
   </div>
 </div>
 
@@ -235,6 +244,51 @@ const PADS=[...document.querySelectorAll('.sig')].map(box=>{
   window.addEventListener('resize',size); size();
   return {clear(){restore();}};
 });
+
+// ===== 서버 제출 (Google Apps Script 웹앱) =====
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbw9Uy0YLqUxE9QeYV8NBOAyxKOysw2I59ATszCTnQnJE7zb-RKofLSJdmpx3NRCszd-/exec'; // Apps Script 웹앱 (제출 전용)
+const toast = document.createElement('div'); toast.className = 'toast'; document.body.appendChild(toast);
+function showToast(msg, ok){ toast.textContent = msg; toast.className = 'toast show ' + (ok ? 'ok' : 'err');
+  clearTimeout(showToast.t); showToast.t = setTimeout(() => toast.classList.remove('show'), 4000); }
+const newId = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+
+function updateSubmittedLabel(){
+  const lbl = document.getElementById('progLbl');
+  if (S.lastSubmit) lbl.innerHTML = lbl.textContent + ` · <span class="submitted">제출 완료 ${esc(S.lastSubmit)}</span>`;
+}
+const _render = render;
+render = function(){ _render(); updateSubmittedLabel(); };
+
+document.getElementById('btnSubmit').onclick = async () => {
+  if (!ENDPOINT) { showToast('서버 주소가 아직 설정되지 않았습니다. 관리자에게 문의해 주세요.', false); return; }
+  if (!(S.f.store || document.querySelector('[data-k="store"]').value).trim()) { showToast('매장명을 입력해 주세요.', false); return; }
+  const left = ITEMS.filter(([n]) => !S.st[n]).length;
+  if (left && !confirm(`확인 여부를 선택하지 않은 항목이 ${left}개 있습니다. 그대로 제출할까요?`)) return;
+  if (!S.sig.inspector || !S.sig.store) { if (!confirm('서명이 비어 있는 칸이 있습니다. 그대로 제출할까요?')) return; }
+
+  if (!S.pendingId) { S.pendingId = newId(); save(); }   // 재시도해도 같은 ID → 서버에서 중복 저장 안 함
+  const val = k => (S.f[k] != null ? S.f[k] : (document.querySelector(`[data-k="${k}"]`) || {}).value || '');
+  const itemMemo = {}; ITEMS.forEach(([n]) => { if (S.f['memo.' + n]) itemMemo[n] = S.f['memo.' + n]; });
+  const payload = {
+    v: 1, id: S.pendingId,
+    fields: { store: val('store'), date: val('date'), owner: val('owner'), installer: val('installer'),
+              memo: val('memo'), inspector: val('sign.inspector'), storeSigner: val('sign.store') },
+    status: S.st, itemMemo, signatures: { inspector: S.sig.inspector || '', store: S.sig.store || '' }
+  };
+
+  const btn = document.getElementById('btnSubmit'); btn.disabled = true; btn.textContent = '제출 중…';
+  try {
+    const res = await fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+    const r = await res.json();
+    if (!r.ok) throw new Error(r.error || 'error');
+    S.lastSubmit = new Date().toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' });
+    delete S.pendingId; save(); render();
+    showToast('제출되었습니다.', true);
+  } catch (e) {
+    showToast(e.message === 'store_required' ? '매장명을 입력해 주세요.' : '제출에 실패했습니다. 네트워크를 확인하고 다시 눌러 주세요.', false);
+  } finally { btn.disabled = false; btn.textContent = '제출'; }
+};
+render();
 function render(){
   document.querySelectorAll('.row').forEach(r=>{
     const v=S.st[r.dataset.id];
