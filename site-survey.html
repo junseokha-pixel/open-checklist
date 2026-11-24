@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>현장 설치 체크리스트</title>
 <style>
 :root{
@@ -55,10 +55,6 @@ textarea{min-height:110px;resize:vertical}
 .tog button.on.y{background:var(--ok);border-color:var(--ok);color:#fff}
 .tog button.on.n{background:var(--no);border-color:var(--no);color:#fff}
 .row input{font-size:13px}
-@media (max-width:640px){
-  .row{grid-template-columns:40px 1fr auto;grid-template-areas:"n t g" "n m m"}
-  .row .no{grid-area:n} .row .t{grid-area:t} .row .tog{grid-area:g} .row .memo{grid-area:m}
-}
 .head-row{display:grid;grid-template-columns:48px 1fr auto 1fr;gap:10px;padding:8px 12px;background:var(--soft);
   font-size:13px;font-weight:700;color:var(--muted)}
 .head-row span:nth-child(3){min-width:96px;text-align:center}
@@ -84,6 +80,31 @@ textarea{min-height:110px;resize:vertical}
 .prog .fill{height:100%;background:var(--ok);width:0;transition:width .2s}
 .btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:6px 12px;cursor:pointer}
 .btn.pri{background:var(--navy);color:#fff;border-color:var(--navy)}
+/* ===== 모바일 ===== */
+@media (max-width:640px){
+  .wrap{padding:12px 12px calc(92px + env(safe-area-inset-bottom))}
+  .brand img{height:40px;padding:3px 6px}
+  header{margin:4px 0 12px;gap:2px} h1{font-size:22px} header p{font-size:13px;width:100%}
+  .card{margin:10px 0}
+  .bar{padding:10px 12px;flex-wrap:wrap;row-gap:2px} .bar h2{font-size:15px}
+  .bar .cnt{font-size:12px;font-weight:500}
+  .info{grid-template-columns:88px 1fr}
+  .info label{padding:10px 8px;font-size:13px;display:flex;align-items:center;white-space:nowrap}
+  .info div{padding:6px 8px}
+  /* iOS에서 입력 시 화면 확대 방지: 16px 이상 */
+  input[type=text],input[type=date],textarea,.row input{font-size:16px;padding:9px 10px}
+  .row{grid-template-columns:30px auto 1fr;grid-template-areas:"n t t" ". g m";gap:8px;padding:12px}
+  .row .no{grid-area:n;text-align:left;align-self:start;padding-top:1px}
+  .row .t{grid-area:t;font-size:15px} .row.sub .t{padding-left:4px}
+  .row .tog{grid-area:g} .row .memo{grid-area:m;min-width:0}
+  .tog button{min-width:54px;min-height:42px;font-size:15px;padding:6px 8px}
+  .sign{gap:10px}
+  .sig .pad-wrap{height:110px}
+  .sig .tools button{font-size:14px;padding:6px 0}
+  .dock .in{padding:8px 12px calc(8px + env(safe-area-inset-bottom));gap:8px}
+  .prog{min-width:120px}
+  .btn{padding:10px 12px;font-size:14px}
+}
 @media print{body{background:#fff;font-size:12px}.dock{display:none}.wrap{padding:0}.card{break-inside:avoid}}
 </style>
 </head>
