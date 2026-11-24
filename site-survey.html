@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>현장 설치 체크리스트</title>
+<style>
+:root{
+  --bg:#f4f6fa; --card:#ffffff; --ink:#1d2433; --muted:#6b7385; --line:#d9deea;
+  --navy:#1d5fd6; --soft:#eaf1fd; --ok:#1e8e5a; --ok-soft:#e3f5ec; --no:#c0392b; --no-soft:#fdecea; --accent:#1f3864;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151d; --card:#1a202b; --ink:#e6e9f0; --muted:#9aa3b5; --line:#2d3545;
+    --navy:#2c62c9; --soft:#1f2a3f; --ok:#4cc38a; --ok-soft:#173326; --no:#ff6b5b; --no-soft:#3a1f1c; --accent:#8fb0ea;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151d; --card:#1a202b; --ink:#e6e9f0; --muted:#9aa3b5; --line:#2d3545;
+  --navy:#2c62c9; --soft:#1f2a3f; --ok:#4cc38a; --ok-soft:#173326; --no:#ff6b5b; --no-soft:#3a1f1c; --accent:#8fb0ea;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-size:15px;line-height:1.45}
+.wrap{max-width:900px;margin:0 auto;padding:16px 16px 110px}
+.brand{display:flex;justify-content:flex-start;margin:4px 0 6px}
+.brand img{height:56px;width:auto;background:#fff;border-radius:6px;padding:4px 8px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  border-bottom:3px solid var(--navy);padding-bottom:8px;margin:8px 0 16px}
+h1{font-size:26px;margin:0}
+header p{margin:0;color:var(--muted);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;margin:14px 0;overflow:hidden}
+.bar{background:var(--navy);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.bar h2{font-size:16px;margin:0;flex:1}
+.bar .cnt{font-size:13px;font-weight:600}
+.pad{padding:12px 14px}
+.info{display:grid;grid-template-columns:110px 1fr 110px 1fr}
+.info label{background:var(--soft);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--line)}
+.info div{padding:6px 10px;border-bottom:1px solid var(--line)}
+@media (max-width:640px){.info{grid-template-columns:100px 1fr}}
+input[type=text],input[type=date],textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);
+  border:1px solid var(--line);border-radius:5px;padding:6px 8px}
+textarea{min-height:110px;resize:vertical}
+.row{display:grid;grid-template-columns:48px 1fr auto 1fr;gap:10px;align-items:center;
+  padding:8px 12px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .no{font-weight:700;color:var(--muted);text-align:center;font-size:14px}
+.row .t{font-weight:600}
+.row.sub .t{font-weight:400;color:var(--muted);padding-left:14px}
+.row.sub .t::before{content:"└ "}
+.row.st-y{background:var(--ok-soft)} .row.st-n{background:var(--no-soft)}
+.tog{display:flex;gap:4px}
+.tog button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--muted);
+  border-radius:5px;padding:5px 6px;cursor:pointer;min-width:40px}
+.tog button.on.y{background:var(--ok);border-color:var(--ok);color:#fff}
+.tog button.on.n{background:var(--no);border-color:var(--no);color:#fff}
+.row input{font-size:13px}
+@media (max-width:640px){
+  .row{grid-template-columns:40px 1fr auto;grid-template-areas:"n t g" "n m m"}
+  .row .no{grid-area:n} .row .t{grid-area:t} .row .tog{grid-area:g} .row .memo{grid-area:m}
+}
+.head-row{display:grid;grid-template-columns:48px 1fr auto 1fr;gap:10px;padding:8px 12px;background:var(--soft);
+  font-size:13px;font-weight:700;color:var(--muted)}
+.head-row span:nth-child(3){min-width:96px;text-align:center}
+@media (max-width:640px){.head-row{display:none}}
+.noList{margin:0 0 10px;padding-left:18px;color:var(--no);font-size:14px}
+.sign{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.sign{grid-template-columns:1fr}}
+.sign .box{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--card)}
+.sign .box b{display:block;margin-bottom:6px}
+.sig{margin-top:8px}
+.sig .pad-wrap{position:relative;border:1px dashed #b8c0d0;border-radius:6px;background:#fff;height:90px}
+.sig canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;border-radius:6px}
+.sig .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#a0a8b8;font-size:13px;pointer-events:none}
+.sig .ph.hide{display:none}
+.sig .tools{display:flex;justify-content:flex-end;margin-top:4px}
+.sig .tools button{font:inherit;font-size:12px;border:0;background:none;color:var(--muted);cursor:pointer;text-decoration:underline}
+@media print{.sig .tools,.sig .ph{display:none}.sig .pad-wrap{border-style:solid}}
+.dock{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line)}
+.dock .in{max-width:900px;margin:0 auto;padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.prog{flex:1;min-width:160px}
+.prog .lbl{font-size:12px;color:var(--muted);margin-bottom:4px}
+.prog .track{height:8px;background:var(--soft);border-radius:4px;overflow:hidden}
+.prog .fill{height:100%;background:var(--ok);width:0;transition:width .2s}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:6px 12px;cursor:pointer}
+.btn.pri{background:var(--navy);color:#fff;border-color:var(--navy)}
+@media print{body{background:#fff;font-size:12px}.dock{display:none}.wrap{padding:0}.card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="brand"><img src="common-eats.webp" alt="COMMON EATS"></div>
+<header>
+  <h1>현장 설치 체크리스트</h1>
+  <p>현장 점검 및 기기·시스템 세팅 확인서</p>
+</header>
+
+<div class="card">
+  <div class="info">
+    <label>매장명</label><div><input type="text" data-k="store" value="CJ 푸드빌"></div>
+    <label>점검일자</label><div><input type="date" data-k="date"></div>
+    <label>매장 담당자</label><div><input type="text" data-k="owner"></div>
+    <label>설치 담당자</label><div><input type="text" data-k="installer"></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="bar"><h2>현장 체크사항</h2><span class="cnt" id="cnt"></span></div>
+  <div class="head-row"><span>No.</span><span>현장 체크사항</span><span>확인 여부</span><span>비고 / 특이사항</span></div>
+  <div id="list"></div>
+</div>
+
+<div class="card">
+  <div class="bar"><h2>현장 종합 메모 및 추가 조치사항</h2></div>
+  <div class="pad">
+    <div id="noAuto"></div>
+    <textarea data-k="memo" placeholder="추가로 필요한 조치(공유기 추가, 랜선 가설 등)를 적어 주세요."></textarea>
+  </div>
+</div>
+
+<div class="sign">
+  <div class="box"><b>점검자 확인</b><input type="text" data-k="sign.inspector" placeholder="성명">
+    <div class="sig" data-sig="inspector"><div class="pad-wrap"><canvas></canvas><div class="ph">여기에 서명하세요</div></div>
+    <div class="tools"><button type="button">지우기</button></div></div></div>
+  <div class="box"><b>매장 확인</b><input type="text" data-k="sign.store" placeholder="성명">
+    <div class="sig" data-sig="store"><div class="pad-wrap"><canvas></canvas><div class="ph">여기에 서명하세요</div></div>
+    <div class="tools"><button type="button">지우기</button></div></div></div>
+</div>
+</div>
+
+<div class="dock">
+  <div class="in">
+    <div class="prog"><div class="lbl" id="progLbl"></div><div class="track"><div class="fill" id="progFill"></div></div></div>
+    <button class="btn" id="btnReset">초기화</button>
+    <button class="btn pri" onclick="window.print()">인쇄 / PDF</button>
+  </div>
+</div>
+
+<script>
+const ITEMS=[
+ ['1','테블릿, 키오스크 설치 위치체크'],
+ ['1-1','카운터 타공 체크(전원선 연결)'],
+ ['2','전원 콘센트 여분 체크'],
+ ['3','WIFI유무 체크(없을 경우 공유기 추가 필요)'],
+ ['4','KDS 사용시 WIFI 거리'],
+ ['4-1','KDS 설치 위치 및 전원 연결 유무'],
+ ['4-2','KDS 위치 발열 부분 체크(냉장고 위 또는 뜨거운 기기 체크)'],
+ ['5','메뉴 및 옵션 상품 구성(메뉴확인)'],
+ ['5-1','KIOSK용 이미지 사진'],
+ ['6','KIOSK 설치 위치 렌선 가설 체크'],
+ ['7','배달 사용 유무'],
+ ['8','상품권 사용 유무'],
+ ['9','기타 결제 및 포인트 사용 유무'],
+ ['9-1','각종 할인 결제 기능 체크'],
+ ['9-2','통신사 할인 여부 체크'],
+ ['10','모바일(APP) 주문 사용 유무'],
+ ['11','대시보드 사용(본사, 가맹점)'],
+ ['12','바코드 사용 유무(상품별 검색)']
+];
+const KEY='site-survey-v1';
+let S={st:{},f:{}};
+try{const r=localStorage.getItem(KEY); if(r) S=Object.assign(S,JSON.parse(r));}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+document.getElementById('list').innerHTML=ITEMS.map(([no,t])=>`
+ <div class="row ${no.includes('-')?'sub':''}" data-id="${no}">
+  <span class="no">${no}</span><span class="t">${esc(t)}</span>
+  <span class="tog"><button class="y" data-v="y">예</button><button class="n" data-v="n">아니오</button></span>
+  <span class="memo"><input type="text" data-k="memo.${no}" placeholder="비고"></span>
+ </div>`).join('');
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.tog button'); if(!b) return;
+  const id=b.closest('.row').dataset.id, v=b.dataset.v;
+  if(S.st[id]===v) delete S.st[id]; else S.st[id]=v;
+  save(); render();
+});
+document.querySelectorAll('[data-k]').forEach(el=>{
+  const k=el.dataset.k; if(S.f[k]!=null) el.value=S.f[k];
+  el.addEventListener('input',()=>{S.f[k]=el.value; save(); if(k.startsWith('memo.')) render();});
+});
+document.getElementById('btnReset').onclick=()=>{
+  if(!confirm('모든 체크와 입력값을 지울까요?')) return;
+  S={st:{},f:{},sig:{}}; save(); document.querySelectorAll('[data-k]').forEach(el=>el.value=el.defaultValue);
+  PADS.forEach(p=>p.clear()); render();
+};
+
+// 서명 패드 (마우스·터치·펜)
+S.sig=S.sig||{};
+const PADS=[...document.querySelectorAll('.sig')].map(box=>{
+  const key=box.dataset.sig, cv=box.querySelector('canvas'), ph=box.querySelector('.ph'), ctx=cv.getContext('2d');
+  let drawing=false, last=null;
+  function size(){
+    const r=cv.getBoundingClientRect(), dpr=window.devicePixelRatio||1;
+    cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#111';
+    restore();
+  }
+  function restore(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    const d=S.sig[key]; ph.classList.toggle('hide',!!d);
+    if(d){const img=new Image(); img.onload=()=>{const r=cv.getBoundingClientRect(); ctx.drawImage(img,0,0,r.width,r.height);}; img.src=d;}
+  }
+  const pt=e=>{const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top};};
+  cv.addEventListener('pointerdown',e=>{drawing=true; last=pt(e); cv.setPointerCapture(e.pointerId); ph.classList.add('hide');
+    ctx.beginPath(); ctx.arc(last.x,last.y,1.1,0,Math.PI*2); ctx.fillStyle='#111'; ctx.fill();});
+  cv.addEventListener('pointermove',e=>{if(!drawing) return; const p=pt(e);
+    ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p;});
+  const end=()=>{if(!drawing) return; drawing=false; S.sig[key]=cv.toDataURL('image/png'); save();};
+  cv.addEventListener('pointerup',end); cv.addEventListener('pointercancel',end);
+  box.querySelector('.tools button').onclick=()=>{delete S.sig[key]; save(); restore();};
+  window.addEventListener('resize',size); size();
+  return {clear(){restore();}};
+});
+function render(){
+  document.querySelectorAll('.row').forEach(r=>{
+    const v=S.st[r.dataset.id];
+    r.classList.toggle('st-y',v==='y'); r.classList.toggle('st-n',v==='n');
+    r.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  });
+  const done=ITEMS.filter(([n])=>S.st[n]).length, yes=ITEMS.filter(([n])=>S.st[n]==='y').length;
+  const no=ITEMS.filter(([n])=>S.st[n]==='n');
+  document.getElementById('cnt').textContent=`예 ${yes} · 아니오 ${no.length} · 미확인 ${ITEMS.length-done}`;
+  document.getElementById('progLbl').textContent=`확인 ${done} / ${ITEMS.length}`;
+  document.getElementById('progFill').style.width=(done/ITEMS.length*100)+'%';
+  document.getElementById('noAuto').innerHTML=no.length?
+    `<ul class="noList">${no.map(([n,t])=>`<li>${n}. ${esc(t)} — 아니오${S.f['memo.'+n]?` (${esc(S.f['memo.'+n])})`:''}</li>`).join('')}</ul>`:'';
+}
+render();
+</script>
+</body>
+</html>
